@@ -221,10 +221,7 @@ home_layout = html.Div([
         dbc.Col([
             html.H1("Welcome to University Programs Dashboard", className="text-center mb-4"),
             # --- Added Summary Card Below Header ---
-            dbc.Card([
-                dbc.CardBody([
-                    html.Hr(),
-                    dbc.Row([
+                                dbc.Row([
                         dbc.Col([
                             dbc.Card([
                                 dbc.CardBody([
@@ -241,10 +238,8 @@ home_layout = html.Div([
                                 ])
                             ], className="text-center")
                         ], md=6),
-                    ])
-                ])
-            ], className="mb-4 shadow rounded-3"), # Added curved corners, shadow, margin
-            # --- End of Summary Card Addition ---
+                    ]),
+
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
@@ -403,10 +398,10 @@ def update_ai_summary_stats(selected_universities, cost_range, sort_by):
      Input('ai-sort', 'value')] # Add sort input to ensure graph updates on sort
 )
 def update_ai_charts(selected_universities, cost_range, sort_by):
-    """Update the charts for AI. Cost Distribution now shows top universities."""
+    """Update the charts for AI. Cost Distribution uses distinct colors, Programs by University is blue."""
     filtered_df = filter_and_sort_data(ai_programs_df, selected_universities, cost_range, sort_by)
 
-    # --- Cost Distribution Chart (Now a Comparison Bar Chart) ---
+    # --- Cost Distribution Chart (Comparison Bar Chart) ---
     if filtered_df.empty:
         cost_fig = go.Figure()
         cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
@@ -415,28 +410,23 @@ def update_ai_charts(selected_universities, cost_range, sort_by):
         bar_fig = go.Figure()
         bar_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
         bar_fig.update_layout(title="Programs by University")
-        return cost_fig, bar_fig # Return early if no data
+        return cost_fig, bar_fig
     else:
-        # Determine universities to show in the cost comparison chart
         if not selected_universities or len(selected_universities) == 0:
-            # If no filter, get top 10 universities from the current filtered/sorted table data
             top_uni_df = filtered_df.drop_duplicates(subset=['University'], keep='first')
-            top_uni_df = top_uni_df.head(10) # Get first 10 rows from the filtered table
+            top_uni_df = top_uni_df.head(10)
         else:
-            # If universities are selected, show those (already filtered in filtered_df)
             top_uni_df = filtered_df.drop_duplicates(subset=['University'], keep='first')
 
-        # --- Create Consistent Color Mapping (Only for Cost Distribution) ---
+        # Color mapping for cost chart
         universities_for_color = top_uni_df['University'].tolist()
         color_sequence = px.colors.qualitative.Set1
         color_map = {uni: color_sequence[i % len(color_sequence)] for i, uni in enumerate(universities_for_color)}
-        # --- End of Color Mapping ---
 
-        # Create the Cost Distribution bar chart with consistent colors
         if top_uni_df.empty:
-             cost_fig = go.Figure()
-             cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
-             cost_fig.update_layout(title="Cost Distribution (Top Universities)")
+            cost_fig = go.Figure()
+            cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+            cost_fig.update_layout(title="Cost Distribution (Top Universities)")
         else:
             cost_fig = px.bar(
                 top_uni_df,
@@ -447,68 +437,64 @@ def update_ai_charts(selected_universities, cost_range, sort_by):
                     'Total program cost (num)': 'Total Cost (Baht)',
                     'University': 'University'
                 },
-                color='University',
+                color='University',  # Use different colors for each university
                 color_discrete_map=color_map
             )
             cost_fig.update_layout(
-                # --- Hide x-axis elements and show legend UNDER the graph for AI Cost Distribution chart ---
                 xaxis=dict(
                     showticklabels=False,
-                    title_text="",
+                    title_text="University",
                     showline=False,
                     showgrid=False
                 ),
                 yaxis_title="Total Cost (Baht)",
-                showlegend=True, # Show legend to identify colors
+                showlegend=True,
                 legend=dict(
-                    orientation='h',  # Horizontal orientation
-                    yanchor='top',   # Anchor point for y positioning
-                    y=-0.15,         # Position below the graph (negative value)
-                    xanchor='center', # Anchor point for x positioning
-                    x=0.5,           # Center the legend horizontally
-                    title='University' # Add a title to the legend
+                    orientation='h',
+                    yanchor='top',
+                    y=-0.15,
+                    xanchor='center',
+                    x=0.5,
+                    title='University'
                 ),
-                 # --- Set background colors to white for AI Cost Distribution chart ---
                 plot_bgcolor='white',
                 paper_bgcolor='white'
-                # --- End of axis hiding, legend positioning, and background color setting ---
             )
-            # Improve bar appearance
             cost_fig.update_traces(marker_line_width=1, marker_line_color='rgb(200,200,200)')
 
-    # --- Programs by University Chart (Bar Chart) - Single Color ---
+    # --- Programs by University Chart (Blue Bars) ---
     uni_counts = filtered_df['University'].value_counts().reset_index()
     uni_counts.columns = ['University', 'Count']
 
-    # No color mapping needed, just use a single color
     if uni_counts.empty:
         bar_fig = go.Figure()
         bar_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
         bar_fig.update_layout(title="Programs by University")
     else:
-        # Use a single color from the palette (e.g., the first one)
-        single_color = px.colors.qualitative.Set1[0] # Or choose any color
-        bar_fig = px.bar(uni_counts, x='University', y='Count',
-                         title='Number of Programs per University',
-                         labels={'Count': 'Number of Programs'},
-                         color_discrete_sequence=[single_color] # Use single color
-                         )
+        single_color = '#1f77b4'  # Blue
+        bar_fig = px.bar(
+            uni_counts,
+            x='University',
+            y='Count',
+            title='Number of Programs per University',
+            labels={'Count': 'Number of Programs'},
+            color_discrete_sequence=[single_color]  # Blue color
+        )
         bar_fig.update_layout(
             xaxis_tickangle=-45,
-            # --- Hide x-axis elements for AI Programs by University ---
             xaxis=dict(
                 showticklabels=False,
-                title_text="",
-                showline=False,
+                title_text="University",
+                showline=True,
                 showgrid=False
             ),
-            # --- Set background colors to white for AI Programs by University chart ---
             plot_bgcolor='white',
             paper_bgcolor='white',
-            showlegend=False # Keep legend hidden for Programs by University chart
-            # --- End of background color setting and hiding x-axis for AI ---
+            showlegend=False
         )
+
     return cost_fig, bar_fig
+
 # --- END OF MODIFICATION ---
 
 

@@ -18,11 +18,10 @@ try:
     ai_programs_df['Total program cost (num)'] = pd.to_numeric(
         ai_programs_df["Total program cost"].astype(str).str.replace(",", ""), errors='coerce'
     )
-    # --- ADD THIS LINE TO CLEAN 'term' COLUMN FOR AI ---
+    # Clean 'term'
     ai_programs_df['term'] = pd.to_numeric(
         ai_programs_df["term"].astype(str).str.replace(",", ""), errors='coerce'
     )
-    # --- END OF ADDITION ---
     ai_programs_df = ai_programs_df.dropna(subset=['Total program cost (num)'])
 
     # --- Load and clean COE Programs Data ---
@@ -32,7 +31,6 @@ try:
         coe_programs_df["Total program cost"].astype(str).str.replace(",", ""), errors='coerce'
     )
     # Assuming 'coe_with_term_and_total.csv' already has a numeric 'term' column
-    # If not, you'd need a similar line here for coe_programs_df['term']
     coe_programs_df = coe_programs_df.dropna(subset=['Total program cost (num)'])
 
     print("CSV files loaded and cleaned successfully!")
@@ -59,7 +57,6 @@ navbar = dbc.Navbar(
             xs=12, md=6,
         ),
         dbc.Col(
-            # Fixed typo: Anlaystics -> Analytics
             html.H1('Tcas Analytics Dashboard', className='text', id='logo', style={"color": "white"}),
             xs=12, md=6,
         ),
@@ -69,8 +66,6 @@ navbar = dbc.Navbar(
 )
 
 # --- 4. Components (Reusable Layout Elements) ---
-# Note: These are defined but not fully implemented with callbacks in this snippet.
-# They are placeholders for the full application structure.
 def create_program_filters(program_type, df):
     """Create filter components for university programs"""
     return dbc.Card([
@@ -125,26 +120,31 @@ def create_program_table(program_type):
         ])
     ])
 
+# --- Modified Chart Components to be in Cards (like Home page) ---
 def create_program_charts(program_type):
-    """Create charts for university programs"""
+    """Create charts for university programs, wrapped in cards like the home page"""
     return dbc.Row([
+        # --- Chart Card for Cost Distribution (Left) ---
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader(html.H5("Cost Distribution")),
+                dbc.CardHeader(html.H5("Cost Distribution", className="mb-0")),
                 dbc.CardBody([
-                    dcc.Graph(id=f'{program_type}-cost-histogram')
-                ])
-            ])
-        ], md=6),
+                    dcc.Graph(id=f'{program_type}-cost-histogram', config={'displayModeBar': False})
+                ]),
+            ], className="mb-4 shadow rounded-3") # Added rounded corners and shadow
+        ], md=6),  # Left column
+        # --- Chart Card for Programs by University (Right) ---
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader(html.H5("Programs by University")),
+                dbc.CardHeader(html.H5("Programs by University", className="mb-0")),
                 dbc.CardBody([
-                    dcc.Graph(id=f'{program_type}-university-bar')
-                ])
-            ])
-        ], md=6),
-    ], className="mb-3")
+                    dcc.Graph(id=f'{program_type}-university-bar', config={'displayModeBar': False})
+                ]),
+            ], className="mb-4 shadow rounded-3") # Added rounded corners and shadow
+        ], md=6),  # Right column
+    ], className="mb-3") # Added margin bottom for spacing
+
+# --- END OF MODIFICATION ---
 
 def create_summary_stats(program_type):
     """Create summary statistics cards"""
@@ -205,7 +205,6 @@ def filter_and_sort_data(df, selected_universities, cost_range, sort_by):
         filtered_df = filtered_df.sort_values(by='University')
     elif sort_by == 'term':
         # Handle potential NaN in 'term' if necessary
-        # Now sorts by the numeric 'term' column
         filtered_df = filtered_df.sort_values(by='term', ascending=True)
     return filtered_df
 
@@ -214,9 +213,7 @@ home_layout = html.Div([
     dbc.Row([
         dbc.Col([
             html.H1("Welcome to University Programs Dashboard", className="text-center mb-4"),
-            # --- Row for Side-by-Side Graph Cards ---
             dbc.Row([
-                # --- Graph Card for AI Overview (Left) ---
                 dbc.Col([
                     dbc.Card([
                         dbc.CardHeader(html.H4("Cost Overview - AI Engineering", className="mb-0")),
@@ -232,26 +229,20 @@ home_layout = html.Div([
                                         "Total program cost (num)": "Total Cost (Baht)",
                                         "University": ""
                                     },
-                                    # --- Use discrete color sequence ---
-                                    color="University", # Color by University category
-                                    color_discrete_sequence=px.colors.qualitative.Set1, # Distinct colors
-                                    # --- ---
+                                    color="University",
+                                    color_discrete_sequence=px.colors.qualitative.Set1,
                                 ).update_layout(
                                     xaxis_tickangle=-45,
                                     height=500,
-                                    showlegend=False, # Usually hide legend for bar charts colored by x-category
-                                    xaxis=dict(showticklabels=False) # Hide x-axis labels as requested
-                                ).update_traces(
-                                    # Optional: Adjust bar width for potentially better separation
-                                    # width=0.8
-                                ),
+                                    showlegend=False,
+                                    xaxis=dict(showticklabels=False)
+                                ).update_traces(),
                                 config={'displayModeBar': False}
                             ),
                             html.P("Showing all AI Engineering programs sorted by cost.", className="text-muted small mt-2")
                         ]),
-                    ], className="mb-4 shadow rounded-3") # Added rounded corners
-                ], md=6),  # Left column
-                # --- Graph Card for COE Overview (Right) ---
+                    ], className="mb-4 shadow rounded-3")
+                ], md=6),
                 dbc.Col([
                     dbc.Card([
                         dbc.CardHeader(html.H4("Cost Overview - Computer Engineering", className="mb-0")),
@@ -267,27 +258,21 @@ home_layout = html.Div([
                                         'Total program cost (num)': 'Total Cost (Baht)',
                                         'University': ''
                                     },
-                                    # --- Use discrete color sequence ---
-                                    color="University", # Color by University category
-                                    color_discrete_sequence=px.colors.qualitative.Set1, # Distinct colors
-                                    # --- ---
+                                    color="University",
+                                    color_discrete_sequence=px.colors.qualitative.Set1,
                                 ).update_layout(
                                     xaxis_tickangle=-45,
                                     height=500,
-                                    showlegend=False, # Usually hide legend for bar charts colored by x-category
-                                    xaxis=dict(showticklabels=False) # Hide x-axis labels as requested
-                                ).update_traces(
-                                     # Optional: Adjust bar width for potentially better separation
-                                    # width=0.8
-                                ),
+                                    showlegend=False,
+                                    xaxis=dict(showticklabels=False)
+                                ).update_traces(),
                                 config={'displayModeBar': False}
                             ),
                             html.P("Showing the top 10 universities by program cost.", className="text-muted small mt-2")
                         ]),
-                    ], className="mb-4 shadow rounded-3") # Added rounded corners
-                ], md=6),  # Right column
-            ]),  # End of Row for Graph Cards
-            # --- Overview Stats Card ---
+                    ], className="mb-4 shadow rounded-3")
+                ], md=6),
+            ]),
             dbc.Card([
                 dbc.CardBody([
                     html.Hr(),
@@ -318,34 +303,50 @@ home_layout = html.Div([
 ai_programs_layout = html.Div([
     html.H2("AI Engineering Programs", className="mb-4 text-center"),
     create_summary_stats('ai'),
-    # Pass the AI dataframe to the filter component creator
     create_program_filters('ai', ai_programs_df),
+    # --- Use the modified chart component ---
     create_program_charts('ai'),
+    # --- END OF MODIFICATION ---
     create_program_table('ai')
 ])
 
 coe_programs_layout = html.Div([
     html.H2("Computer Engineering Programs", className="mb-4 text-center"),
     create_summary_stats('coe'),
-    # Pass the COE dataframe to the filter component creator
     create_program_filters('coe', coe_programs_df),
-    create_program_charts('coe'),
+    # Assuming you want the same card style for COE charts, you would modify its chart component too.
+    # For now, keeping the original structure for COE as per your initial request to focus on AI.
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader(html.H5("Cost Distribution")),
+                dbc.CardBody([
+                    dcc.Graph(id=f'coe-cost-histogram')
+                ])
+            ])
+        ], md=6),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader(html.H5("Programs by University")),
+                dbc.CardBody([
+                    dcc.Graph(id=f'coe-university-bar')
+                ])
+            ])
+        ], md=6),
+    ], className="mb-3"),
     create_program_table('coe')
 ])
 
 # --- 7. Main layout with URL routing ---
-# Simplified main layout to remove the outer card wrapper around page content
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     navbar,
     dbc.Container([
-        # Content will be injected here directly, not inside another card
         html.Div(id='page-content')
-    ], fluid=True, className="mt-3") # Added mt-3 for top margin
+    ], fluid=True, className="mt-3")
 ])
 
 # --- 8. Callbacks ---
-# --- URL Routing Callback ---
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
@@ -354,11 +355,10 @@ def display_page(pathname):
         return ai_programs_layout
     elif pathname == '/coe-programs':
         return coe_programs_layout
-    else:  # Default to home page
+    else:
         return home_layout
 
 # --- Callbacks for AI Programs Page ---
-# Update Summary Stats for AI
 @app.callback(
     [Output('ai-total-programs', 'children'),
      Output('ai-avg-cost', 'children'),
@@ -384,7 +384,6 @@ def update_ai_summary_stats(selected_universities, cost_range, sort_by):
         max_cost = "N/A"
     return total_programs, avg_cost, min_cost, max_cost
 
-# Update Charts for AI
 @app.callback(
     [Output('ai-cost-histogram', 'figure'),
      Output('ai-university-bar', 'figure')],
@@ -419,7 +418,9 @@ def update_ai_charts(selected_universities, cost_range, sort_by):
         bar_fig.update_layout(xaxis_tickangle=-45)
     return hist_fig, bar_fig
 
-# Update Table for AI
+# --- Modified AI Table Callback to include 'term' and format columns ---
+# --- Modified AI Table Callback to match COE page columns ---
+# --- Modified AI Table Callback for Text Wrapping ---
 @app.callback(
     Output('ai-table-container', 'children'),
     [Input('ai-university-filter', 'value'),
@@ -427,34 +428,53 @@ def update_ai_charts(selected_universities, cost_range, sort_by):
      Input('ai-sort', 'value')]
 )
 def update_ai_table(selected_universities, cost_range, sort_by):
-    """Update the data table for AI."""
+    """Update the data table for AI, including 'Total program cost (num)' and 'term' columns."""
     filtered_df = filter_and_sort_data(ai_programs_df, selected_universities, cost_range, sort_by)
     if filtered_df.empty:
         return html.P("No programs match the selected filters.", className="text-center text-muted")
-    # Select columns to display in the table
-    # Include 'Program' column as it exists in AI data
-    display_columns = ['University', 'Program', 'Course Name', 'Total program cost (num)', 'term']
+    # Select columns to display in the table to match COE page
+    display_columns = ['University', 'Course Name', 'Total program cost (num)', 'term']
     table_data = filtered_df[display_columns].copy()
-    # Format currency columns for display
+    # Format the numeric columns for display in the table
     table_data['Total program cost (num)'] = table_data['Total program cost (num)'].apply(lambda x: f"{x:,.0f} Baht")
     # Handle potential NaN in 'term' (now numeric)
-    # --- FIXED LINE: Use :,.0f formatting on numeric data ---
     table_data['term'] = table_data['term'].apply(lambda x: f"{x:,.0f} Baht/term" if pd.notnull(x) else "N/A")
-    # --- END OF FIX ---
     return dash_table.DataTable(
         data=table_data.to_dict('records'),
-        columns=[{"name": col, "id": col} for col in display_columns],
+        columns=[{"name": col, "id": col} for col in display_columns], # Use display column names
         style_table={'overflowX': 'auto'},
-        style_cell={'textAlign': 'left', 'padding': '5px'},
+        # --- START OF MODIFICATIONS FOR WRAPPING ---
+        style_cell={
+            'textAlign': 'left',
+            'padding': '8px', # Slightly increased padding for readability
+            'whiteSpace': 'normal', # Allow text to wrap
+            'height': 'auto',      # Adjust height automatically
+            'lineHeight': '1.4'    # Improve line spacing
+        },
         style_header={
             'backgroundColor': 'rgb(230, 230, 230)',
-            'fontWeight': 'bold'
+            'fontWeight': 'bold',
+             'whiteSpace': 'normal', # Allow header text to wrap if needed
+             'height': 'auto'
         },
-        page_size=10 # Show 10 rows per page
+        # Optional: Set explicit column widths if needed for better control
+        # style_data_conditional=[
+        #     {
+        #         'if': {'column_id': 'University'},
+        #         'minWidth': '150px', 'width': '180px', 'maxWidth': '250px'
+        #     },
+        #     {
+        #         'if': {'column_id': 'Course Name'},
+        #         'minWidth': '200px', 'width': '250px', 'maxWidth': '400px'
+        #     },
+        #     # Add widths for other columns as needed
+        # ],
+        page_size=10
+        # --- END OF MODIFICATIONS FOR WRAPPING ---
     )
+# --- END OF MODIFICATION ---
 
-# --- Callbacks for Computer Engineering Page (Example Implementation) ---
-# Update Summary Stats for COE
+# --- Callbacks for Computer Engineering Page ---
 @app.callback(
     [Output('coe-total-programs', 'children'),
      Output('coe-avg-cost', 'children'),
@@ -480,7 +500,6 @@ def update_coe_summary_stats(selected_universities, cost_range, sort_by):
         max_cost = "N/A"
     return total_programs, avg_cost, min_cost, max_cost
 
-# Update Charts for COE
 @app.callback(
     [Output('coe-cost-histogram', 'figure'),
      Output('coe-university-bar', 'figure')],
@@ -515,7 +534,6 @@ def update_coe_charts(selected_universities, cost_range, sort_by):
         bar_fig.update_layout(xaxis_tickangle=-45)
     return hist_fig, bar_fig
 
-# Update Table for COE
 @app.callback(
     Output('coe-table-container', 'children'),
     [Input('coe-university-filter', 'value'),
@@ -533,9 +551,7 @@ def update_coe_table(selected_universities, cost_range, sort_by):
     # Format currency columns for display
     table_data['Total program cost (num)'] = table_data['Total program cost (num)'].apply(lambda x: f"{x:,.0f} Baht")
     # Handle potential NaN in 'term'
-    # --- ASSUMING 'coe_programs_df' has a numeric 'term' column ---
     table_data['term'] = table_data['term'].apply(lambda x: f"{x:,.0f} Baht/term" if pd.notnull(x) else "N/A")
-    # --- END OF ASSUMPTION ---
     return dash_table.DataTable(
         data=table_data.to_dict('records'),
         columns=[{"name": col, "id": col} for col in display_columns],
@@ -545,10 +561,9 @@ def update_coe_table(selected_universities, cost_range, sort_by):
             'backgroundColor': 'rgb(230, 230, 230)',
             'fontWeight': 'bold'
         },
-        page_size=10 # Show 10 rows per page
+        page_size=10
     )
 
 # --- 9. Run the app ---
 if __name__ == '__main__':
-    # Use app.run() for newer versions of Dash
     app.run(debug=True)

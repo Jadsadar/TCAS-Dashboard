@@ -66,6 +66,7 @@ navbar = dbc.Navbar(
 )
 
 # --- 4. Components (Reusable Layout Elements) ---
+
 def create_program_filters(program_type, df):
     """Create filter components for university programs"""
     return dbc.Card([
@@ -111,27 +112,31 @@ def create_program_filters(program_type, df):
         ])
     ], className="mb-3")
 
+
+# --- Modified Program Table Component with Curved Corners ---
 def create_program_table(program_type):
-    """Create table component for university programs"""
+    """Create table component for university programs, wrapped in a curved card."""
     return dbc.Card([
         dbc.CardHeader(html.H5("Program Details")),
         dbc.CardBody([
             html.Div(id=f'{program_type}-table-container')
         ])
-    ])
+    ], className="mb-4 shadow rounded-3") # Added rounded corners, shadow, and margin bottom
+# --- END OF MODIFICATION ---
 
-# --- Modified Chart Components to be in Cards (like Home page) ---
+
+# --- Modified Chart Components to be in Cards with White Background and Curved Corners ---
 def create_program_charts(program_type):
-    """Create charts for university programs, wrapped in cards like the home page"""
+    """Create charts for university programs, wrapped in cards with white background and curved corners."""
     return dbc.Row([
         # --- Chart Card for Cost Distribution (Left) ---
         dbc.Col([
             dbc.Card([
                 dbc.CardHeader(html.H5("Cost Distribution", className="mb-0")),
                 dbc.CardBody([
-                    dcc.Graph(id=f'{program_type}-cost-histogram', config={'displayModeBar': False})
-                ]),
-            ], className="mb-4 shadow rounded-3") # Added rounded corners and shadow
+                    dcc.Graph(id=f'{program_type}-cost-histogram', config={'displayModeBar': False}) # ID kept for compatibility
+                ], style={'backgroundColor': 'white'}), # Set card body background to white
+            ], className="mb-4 shadow rounded-3", style={'backgroundColor': 'white'}) # Set card background to white
         ], md=6),  # Left column
         # --- Chart Card for Programs by University (Right) ---
         dbc.Col([
@@ -139,12 +144,12 @@ def create_program_charts(program_type):
                 dbc.CardHeader(html.H5("Programs by University", className="mb-0")),
                 dbc.CardBody([
                     dcc.Graph(id=f'{program_type}-university-bar', config={'displayModeBar': False})
-                ]),
-            ], className="mb-4 shadow rounded-3") # Added rounded corners and shadow
+                ], style={'backgroundColor': 'white'}), # Set card body background to white
+            ], className="mb-4 shadow rounded-3", style={'backgroundColor': 'white'}) # Set card background to white
         ], md=6),  # Right column
     ], className="mb-3") # Added margin bottom for spacing
-
 # --- END OF MODIFICATION ---
+
 
 def create_summary_stats(program_type):
     """Create summary statistics cards"""
@@ -183,6 +188,7 @@ def create_summary_stats(program_type):
         ], md=3),
     ], className="mb-3")
 
+
 # --- 5. Helper Function for Filtering and Sorting ---
 def filter_and_sort_data(df, selected_universities, cost_range, sort_by):
     """Helper function to filter and sort data"""
@@ -208,71 +214,13 @@ def filter_and_sort_data(df, selected_universities, cost_range, sort_by):
         filtered_df = filtered_df.sort_values(by='term', ascending=True)
     return filtered_df
 
+
 # --- 6. Page layouts ---
 home_layout = html.Div([
     dbc.Row([
         dbc.Col([
             html.H1("Welcome to University Programs Dashboard", className="text-center mb-4"),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardHeader(html.H4("Cost Overview - AI Engineering", className="mb-0")),
-                        dbc.CardBody([
-                            dcc.Graph(
-                                id='home-ai-cost-graph',
-                                figure=px.bar(
-                                    ai_programs_df.sort_values(by="Total program cost (num)", ascending=False),
-                                    x="University",
-                                    y="Total program cost (num)",
-                                    title='Total Program Cost (AI Engineering)',
-                                    labels={
-                                        "Total program cost (num)": "Total Cost (Baht)",
-                                        "University": ""
-                                    },
-                                    color="University",
-                                    color_discrete_sequence=px.colors.qualitative.Set1,
-                                ).update_layout(
-                                    xaxis_tickangle=-45,
-                                    height=500,
-                                    showlegend=False,
-                                    xaxis=dict(showticklabels=False)
-                                ).update_traces(),
-                                config={'displayModeBar': False}
-                            ),
-                            html.P("Showing all AI Engineering programs sorted by cost.", className="text-muted small mt-2")
-                        ]),
-                    ], className="mb-4 shadow rounded-3")
-                ], md=6),
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardHeader(html.H4("Cost Overview - Computer Engineering", className="mb-0")),
-                        dbc.CardBody([
-                            dcc.Graph(
-                                id='home-coe-cost-graph',
-                                figure=px.bar(
-                                    coe_programs_df.sort_values(by="Total program cost (num)", ascending=False).head(10),
-                                    x='University',
-                                    y='Total program cost (num)',
-                                    title='Top 10 Universities - Total Program Cost (Computer Engineering)',
-                                    labels={
-                                        'Total program cost (num)': 'Total Cost (Baht)',
-                                        'University': ''
-                                    },
-                                    color="University",
-                                    color_discrete_sequence=px.colors.qualitative.Set1,
-                                ).update_layout(
-                                    xaxis_tickangle=-45,
-                                    height=500,
-                                    showlegend=False,
-                                    xaxis=dict(showticklabels=False)
-                                ).update_traces(),
-                                config={'displayModeBar': False}
-                            ),
-                            html.P("Showing the top 10 universities by program cost.", className="text-muted small mt-2")
-                        ]),
-                    ], className="mb-4 shadow rounded-3")
-                ], md=6),
-            ]),
+            # --- Added Summary Card Below Header ---
             dbc.Card([
                 dbc.CardBody([
                     html.Hr(),
@@ -295,10 +243,80 @@ home_layout = html.Div([
                         ], md=6),
                     ])
                 ])
-            ])
+            ], className="mb-4 shadow rounded-3"), # Added curved corners, shadow, margin
+            # --- End of Summary Card Addition ---
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader(html.H4("Cost Overview - AI Engineering", className="mb-0")),
+                        dbc.CardBody([
+                            dcc.Graph(
+                                id='home-ai-cost-graph',
+                                figure=px.bar(
+                                    ai_programs_df.sort_values(by="Total program cost (num)", ascending=False),
+                                    x="University",
+                                    y="Total program cost (num)",
+                                    title='Total Program Cost (AI Engineering)',
+                                    labels={
+                                        "Total program cost (num)": "Total Cost (Baht)",
+                                        "University": ""
+                                    },
+                                    color="University",
+                                    color_discrete_sequence=px.colors.qualitative.Set1,
+                                ).update_layout(
+                                    xaxis_tickangle=-45,
+                                    height=500,
+                                    showlegend=False,
+                                    xaxis=dict(showticklabels=False),
+                                    # --- Set background colors to white ---
+                                    plot_bgcolor='white',
+                                    paper_bgcolor='white'
+                                    # --- End of background color setting ---
+                                ).update_traces(),
+                                config={'displayModeBar': False}
+                            ),
+                            html.P("Showing all AI Engineering programs sorted by cost.", className="text-muted small mt-2")
+                        ], style={'backgroundColor': 'white'}), # Set card body background to white
+                    ], className="mb-4 shadow rounded-3", style={'backgroundColor': 'white'}) # Set card background to white
+                ], md=6),
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader(html.H4("Cost Overview - Computer Engineering", className="mb-0")),
+                        dbc.CardBody([
+                            dcc.Graph(
+                                id='home-coe-cost-graph',
+                                figure=px.bar(
+                                    coe_programs_df.sort_values(by="Total program cost (num)", ascending=False).head(10),
+                                    x='University',
+                                    y='Total program cost (num)',
+                                    title='Top 10 Universities - Total Program Cost (Computer Engineering)',
+                                    labels={
+                                        'Total program cost (num)': 'Total Cost (Baht)',
+                                        'University': ''
+                                    },
+                                    color="University",
+                                    color_discrete_sequence=px.colors.qualitative.Set1,
+                                ).update_layout(
+                                    xaxis_tickangle=-45,
+                                    height=500,
+                                    showlegend=False,
+                                    xaxis=dict(showticklabels=False),
+                                     # --- Set background colors to white ---
+                                    plot_bgcolor='white',
+                                    paper_bgcolor='white'
+                                    # --- End of background color setting ---
+                                ).update_traces(),
+                                config={'displayModeBar': False}
+                            ),
+                            html.P("Showing the top 10 universities by program cost.", className="text-muted small mt-2")
+                        ], style={'backgroundColor': 'white'}), # Set card body background to white
+                    ], className="mb-4 shadow rounded-3", style={'backgroundColor': 'white'}) # Set card background to white
+                ], md=6),
+            ]),
         ])
     ])
 ])
+
 
 ai_programs_layout = html.Div([
     html.H2("AI Engineering Programs", className="mb-4 text-center"),
@@ -310,32 +328,19 @@ ai_programs_layout = html.Div([
     create_program_table('ai')
 ])
 
+
+# --- FIXED COE LAYOUT TO USE CONSISTENT HELPER ---
 coe_programs_layout = html.Div([
     html.H2("Computer Engineering Programs", className="mb-4 text-center"),
     create_summary_stats('coe'),
     create_program_filters('coe', coe_programs_df),
-    # Assuming you want the same card style for COE charts, you would modify its chart component too.
-    # For now, keeping the original structure for COE as per your initial request to focus on AI.
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader(html.H5("Cost Distribution")),
-                dbc.CardBody([
-                    dcc.Graph(id=f'coe-cost-histogram')
-                ])
-            ])
-        ], md=6),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader(html.H5("Programs by University")),
-                dbc.CardBody([
-                    dcc.Graph(id=f'coe-university-bar')
-                ])
-            ])
-        ], md=6),
-    ], className="mb-3"),
+    # --- Use the modified chart component for COE too ---
+    create_program_charts('coe'),
+    # --- END OF MODIFICATION ---
     create_program_table('coe')
 ])
+# --- END OF FIX ---
+
 
 # --- 7. Main layout with URL routing ---
 app.layout = html.Div([
@@ -346,7 +351,9 @@ app.layout = html.Div([
     ], fluid=True, className="mt-3")
 ])
 
+
 # --- 8. Callbacks ---
+
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
@@ -358,7 +365,9 @@ def display_page(pathname):
     else:
         return home_layout
 
+
 # --- Callbacks for AI Programs Page ---
+
 @app.callback(
     [Output('ai-total-programs', 'children'),
      Output('ai-avg-cost', 'children'),
@@ -384,43 +393,126 @@ def update_ai_summary_stats(selected_universities, cost_range, sort_by):
         max_cost = "N/A"
     return total_programs, avg_cost, min_cost, max_cost
 
+
+# --- MODIFIED AI CHARTS CALLBACK: Updated Cost Distribution logic, matching colors (only for Cost Dist), legend under ---
 @app.callback(
-    [Output('ai-cost-histogram', 'figure'),
+    [Output('ai-cost-histogram', 'figure'), # Note: Keeping ID for now, but it's a bar chart now
      Output('ai-university-bar', 'figure')],
     [Input('ai-university-filter', 'value'),
      Input('ai-cost-range', 'value'),
-     Input('ai-sort', 'value')]
+     Input('ai-sort', 'value')] # Add sort input to ensure graph updates on sort
 )
 def update_ai_charts(selected_universities, cost_range, sort_by):
-    """Update the charts for AI."""
+    """Update the charts for AI. Cost Distribution now shows top universities."""
     filtered_df = filter_and_sort_data(ai_programs_df, selected_universities, cost_range, sort_by)
-    # Histogram
+
+    # --- Cost Distribution Chart (Now a Comparison Bar Chart) ---
     if filtered_df.empty:
-        hist_fig = go.Figure()
-        hist_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
-        hist_fig.update_layout(title="Cost Distribution")
+        cost_fig = go.Figure()
+        cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+        cost_fig.update_layout(title="Cost Distribution (Top Universities)")
+        # Also create an empty bar chart for Programs by University to return
+        bar_fig = go.Figure()
+        bar_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+        bar_fig.update_layout(title="Programs by University")
+        return cost_fig, bar_fig # Return early if no data
     else:
-        hist_fig = px.histogram(filtered_df, x='Total program cost (num)', nbins=10,
-                                title='Distribution of Total Program Costs',
-                                labels={'Total program cost (num)': 'Total Cost (Baht)'})
-        hist_fig.update_layout(yaxis_title="Number of Programs")
-    # Bar Chart - Programs per University
-    if filtered_df.empty:
+        # Determine universities to show in the cost comparison chart
+        if not selected_universities or len(selected_universities) == 0:
+            # If no filter, get top 10 universities from the current filtered/sorted table data
+            top_uni_df = filtered_df.drop_duplicates(subset=['University'], keep='first')
+            top_uni_df = top_uni_df.head(10) # Get first 10 rows from the filtered table
+        else:
+            # If universities are selected, show those (already filtered in filtered_df)
+            top_uni_df = filtered_df.drop_duplicates(subset=['University'], keep='first')
+
+        # --- Create Consistent Color Mapping (Only for Cost Distribution) ---
+        universities_for_color = top_uni_df['University'].tolist()
+        color_sequence = px.colors.qualitative.Set1
+        color_map = {uni: color_sequence[i % len(color_sequence)] for i, uni in enumerate(universities_for_color)}
+        # --- End of Color Mapping ---
+
+        # Create the Cost Distribution bar chart with consistent colors
+        if top_uni_df.empty:
+             cost_fig = go.Figure()
+             cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+             cost_fig.update_layout(title="Cost Distribution (Top Universities)")
+        else:
+            cost_fig = px.bar(
+                top_uni_df,
+                x='University',
+                y='Total program cost (num)',
+                title='Total Program Cost Comparison (Representative Programs)',
+                labels={
+                    'Total program cost (num)': 'Total Cost (Baht)',
+                    'University': 'University'
+                },
+                color='University',
+                color_discrete_map=color_map
+            )
+            cost_fig.update_layout(
+                # --- Hide x-axis elements and show legend UNDER the graph for AI Cost Distribution chart ---
+                xaxis=dict(
+                    showticklabels=False,
+                    title_text="",
+                    showline=False,
+                    showgrid=False
+                ),
+                yaxis_title="Total Cost (Baht)",
+                showlegend=True, # Show legend to identify colors
+                legend=dict(
+                    orientation='h',  # Horizontal orientation
+                    yanchor='top',   # Anchor point for y positioning
+                    y=-0.15,         # Position below the graph (negative value)
+                    xanchor='center', # Anchor point for x positioning
+                    x=0.5,           # Center the legend horizontally
+                    title='University' # Add a title to the legend
+                ),
+                 # --- Set background colors to white for AI Cost Distribution chart ---
+                plot_bgcolor='white',
+                paper_bgcolor='white'
+                # --- End of axis hiding, legend positioning, and background color setting ---
+            )
+            # Improve bar appearance
+            cost_fig.update_traces(marker_line_width=1, marker_line_color='rgb(200,200,200)')
+
+    # --- Programs by University Chart (Bar Chart) - Single Color ---
+    uni_counts = filtered_df['University'].value_counts().reset_index()
+    uni_counts.columns = ['University', 'Count']
+
+    # No color mapping needed, just use a single color
+    if uni_counts.empty:
         bar_fig = go.Figure()
         bar_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
         bar_fig.update_layout(title="Programs by University")
     else:
-        uni_counts = filtered_df['University'].value_counts().reset_index()
-        uni_counts.columns = ['University', 'Count']
+        # Use a single color from the palette (e.g., the first one)
+        single_color = px.colors.qualitative.Set1[0] # Or choose any color
         bar_fig = px.bar(uni_counts, x='University', y='Count',
                          title='Number of Programs per University',
-                         labels={'Count': 'Number of Programs'})
-        bar_fig.update_layout(xaxis_tickangle=-45)
-    return hist_fig, bar_fig
+                         labels={'Count': 'Number of Programs'},
+                         color_discrete_sequence=[single_color] # Use single color
+                         )
+        bar_fig.update_layout(
+            xaxis_tickangle=-45,
+            # --- Hide x-axis elements for AI Programs by University ---
+            xaxis=dict(
+                showticklabels=False,
+                title_text="",
+                showline=False,
+                showgrid=False
+            ),
+            # --- Set background colors to white for AI Programs by University chart ---
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            showlegend=False # Keep legend hidden for Programs by University chart
+            # --- End of background color setting and hiding x-axis for AI ---
+        )
+    return cost_fig, bar_fig
+# --- END OF MODIFICATION ---
 
-# --- Modified AI Table Callback to include 'term' and format columns ---
-# --- Modified AI Table Callback to match COE page columns ---
-# --- Modified AI Table Callback for Text Wrapping ---
+
+# --- FIXED AI TABLE CALLBACK FOR CONSISTENT COLUMNS AND TEXT WRAPPING ---
 @app.callback(
     Output('ai-table-container', 'children'),
     [Input('ai-university-filter', 'value'),
@@ -428,22 +520,25 @@ def update_ai_charts(selected_universities, cost_range, sort_by):
      Input('ai-sort', 'value')]
 )
 def update_ai_table(selected_universities, cost_range, sort_by):
-    """Update the data table for AI, including 'Total program cost (num)' and 'term' columns."""
+    """Update the data table for AI to match COE page columns and wrap text."""
     filtered_df = filter_and_sort_data(ai_programs_df, selected_universities, cost_range, sort_by)
     if filtered_df.empty:
         return html.P("No programs match the selected filters.", className="text-center text-muted")
-    # Select columns to display in the table to match COE page
+
+    # Select columns to display in the table to match COE page (Removed 'Program')
     display_columns = ['University', 'Course Name', 'Total program cost (num)', 'term']
     table_data = filtered_df[display_columns].copy()
+
     # Format the numeric columns for display in the table
     table_data['Total program cost (num)'] = table_data['Total program cost (num)'].apply(lambda x: f"{x:,.0f} Baht")
     # Handle potential NaN in 'term' (now numeric)
     table_data['term'] = table_data['term'].apply(lambda x: f"{x:,.0f} Baht/term" if pd.notnull(x) else "N/A")
+
     return dash_table.DataTable(
         data=table_data.to_dict('records'),
         columns=[{"name": col, "id": col} for col in display_columns], # Use display column names
         style_table={'overflowX': 'auto'},
-        # --- START OF MODIFICATIONS FOR WRAPPING ---
+        # --- START OF MODIFICATIONS FOR WRAPPING (AI) ---
         style_cell={
             'textAlign': 'left',
             'padding': '8px', # Slightly increased padding for readability
@@ -457,24 +552,14 @@ def update_ai_table(selected_universities, cost_range, sort_by):
              'whiteSpace': 'normal', # Allow header text to wrap if needed
              'height': 'auto'
         },
-        # Optional: Set explicit column widths if needed for better control
-        # style_data_conditional=[
-        #     {
-        #         'if': {'column_id': 'University'},
-        #         'minWidth': '150px', 'width': '180px', 'maxWidth': '250px'
-        #     },
-        #     {
-        #         'if': {'column_id': 'Course Name'},
-        #         'minWidth': '200px', 'width': '250px', 'maxWidth': '400px'
-        #     },
-        #     # Add widths for other columns as needed
-        # ],
+        # --- END OF MODIFICATIONS FOR WRAPPING (AI) ---
         page_size=10
-        # --- END OF MODIFICATIONS FOR WRAPPING ---
     )
-# --- END OF MODIFICATION ---
+# --- END OF FIX ---
+
 
 # --- Callbacks for Computer Engineering Page ---
+
 @app.callback(
     [Output('coe-total-programs', 'children'),
      Output('coe-avg-cost', 'children'),
@@ -500,40 +585,126 @@ def update_coe_summary_stats(selected_universities, cost_range, sort_by):
         max_cost = "N/A"
     return total_programs, avg_cost, min_cost, max_cost
 
+
+# --- MODIFIED COE CHARTS CALLBACK: Updated Cost Distribution logic, matching colors (only for Cost Dist), legend under ---
 @app.callback(
-    [Output('coe-cost-histogram', 'figure'),
+    [Output('coe-cost-histogram', 'figure'), # Note: Keeping ID for now, but it's a bar chart now
      Output('coe-university-bar', 'figure')],
     [Input('coe-university-filter', 'value'),
      Input('coe-cost-range', 'value'),
-     Input('coe-sort', 'value')]
+     Input('coe-sort', 'value')] # Add sort input to ensure graph updates on sort
 )
 def update_coe_charts(selected_universities, cost_range, sort_by):
-    """Update the charts for COE."""
+    """Update the charts for COE. Cost Distribution now shows top universities."""
     filtered_df = filter_and_sort_data(coe_programs_df, selected_universities, cost_range, sort_by)
-    # Histogram
+
+     # --- Cost Distribution Chart (Now a Comparison Bar Chart) ---
     if filtered_df.empty:
-        hist_fig = go.Figure()
-        hist_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
-        hist_fig.update_layout(title="Cost Distribution")
+        cost_fig = go.Figure()
+        cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+        cost_fig.update_layout(title="Cost Distribution (Top Universities)")
+        # Also create an empty bar chart for Programs by University to return
+        bar_fig = go.Figure()
+        bar_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+        bar_fig.update_layout(title="Programs by University")
+        return cost_fig, bar_fig # Return early if no data
     else:
-        hist_fig = px.histogram(filtered_df, x='Total program cost (num)', nbins=10,
-                                title='Distribution of Total Program Costs',
-                                labels={'Total program cost (num)': 'Total Cost (Baht)'})
-        hist_fig.update_layout(yaxis_title="Number of Programs")
-    # Bar Chart - Programs per University
-    if filtered_df.empty:
+        # Determine universities to show in the cost comparison chart
+        if not selected_universities or len(selected_universities) == 0:
+            # If no filter, get top 10 universities from the current filtered/sorted table data
+            top_uni_df = filtered_df.drop_duplicates(subset=['University'], keep='first')
+            top_uni_df = top_uni_df.head(10) # Get first 10 rows from the filtered table
+        else:
+            # If universities are selected, show those (already filtered in filtered_df)
+            top_uni_df = filtered_df.drop_duplicates(subset=['University'], keep='first')
+
+        # --- Create Consistent Color Mapping (Only for Cost Distribution) ---
+        universities_for_color = top_uni_df['University'].tolist()
+        color_sequence = px.colors.qualitative.Set1
+        color_map = {uni: color_sequence[i % len(color_sequence)] for i, uni in enumerate(universities_for_color)}
+        # --- End of Color Mapping ---
+
+        # Create the Cost Distribution bar chart with consistent colors
+        if top_uni_df.empty:
+             cost_fig = go.Figure()
+             cost_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
+             cost_fig.update_layout(title="Cost Distribution (Top Universities)")
+        else:
+            cost_fig = px.bar(
+                top_uni_df,
+                x='University',
+                y='Total program cost (num)',
+                title='Total Program Cost Comparison (Representative Programs)',
+                labels={
+                    'Total program cost (num)': 'Total Cost (Baht)',
+                    'University': 'University'
+                },
+                color='University',
+                color_discrete_map=color_map
+            )
+            cost_fig.update_layout(
+                # --- Hide x-axis elements and show legend UNDER the graph for COE Cost Distribution chart ---
+                xaxis=dict(
+                    showticklabels=False,
+                    title_text="",
+                    showline=False,
+                    showgrid=False
+                ),
+                yaxis_title="Total Cost (Baht)",
+                showlegend=True, # Show legend to identify colors
+                legend=dict(
+                    orientation='h',  # Horizontal orientation
+                    yanchor='top',   # Anchor point for y positioning
+                    y=-0.15,         # Position below the graph (negative value)
+                    xanchor='center', # Anchor point for x positioning
+                    x=0.5,           # Center the legend horizontally
+                    title='University' # Add a title to the legend
+                ),
+                 # --- Set background colors to white for COE Cost Distribution chart ---
+                plot_bgcolor='white',
+                paper_bgcolor='white'
+                # --- End of axis hiding, legend positioning, and background color setting ---
+            )
+            # Improve bar appearance
+            cost_fig.update_traces(marker_line_width=1, marker_line_color='rgb(200,200,200)')
+
+    # --- Programs by University Chart (Bar Chart) - Single Color ---
+    uni_counts = filtered_df['University'].value_counts().reset_index()
+    uni_counts.columns = ['University', 'Count']
+
+    # No color mapping needed, just use a single color
+    if uni_counts.empty:
         bar_fig = go.Figure()
         bar_fig.add_annotation(text="No data available", showarrow=False, xref="paper", yref="paper", x=0.5, y=0.5)
         bar_fig.update_layout(title="Programs by University")
     else:
-        uni_counts = filtered_df['University'].value_counts().reset_index()
-        uni_counts.columns = ['University', 'Count']
+        # Use a single color from the palette (e.g., the first one)
+        single_color = px.colors.qualitative.Set1[0] # Or choose any color
         bar_fig = px.bar(uni_counts, x='University', y='Count',
                          title='Number of Programs per University',
-                         labels={'Count': 'Number of Programs'})
-        bar_fig.update_layout(xaxis_tickangle=-45)
-    return hist_fig, bar_fig
+                         labels={'Count': 'Number of Programs'},
+                         color_discrete_sequence=[single_color] # Use single color
+                         )
+        bar_fig.update_layout(
+            xaxis_tickangle=-45,
+            # --- Hide x-axis elements for COE Programs by University ---
+            xaxis=dict(
+                showticklabels=False,
+                title_text="",
+                showline=False,
+                showgrid=False
+            ),
+            # --- Set background colors to white for COE Programs by University chart ---
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            showlegend=False # Keep legend hidden for Programs by University chart
+            # --- End of background color setting and hiding x-axis for COE ---
+        )
+    return cost_fig, bar_fig
+# --- END OF MODIFICATION ---
 
+
+# --- FIXED COE TABLE CALLBACK FOR CONSISTENT COLUMNS AND TEXT WRAPPING ---
 @app.callback(
     Output('coe-table-container', 'children'),
     [Input('coe-university-filter', 'value'),
@@ -541,28 +712,43 @@ def update_coe_charts(selected_universities, cost_range, sort_by):
      Input('coe-sort', 'value')]
 )
 def update_coe_table(selected_universities, cost_range, sort_by):
-    """Update the data table for COE."""
+    """Update the data table for COE with text wrapping and consistent columns."""
     filtered_df = filter_and_sort_data(coe_programs_df, selected_universities, cost_range, sort_by)
     if filtered_df.empty:
         return html.P("No programs match the selected filters.", className="text-center text-muted")
-    # Select columns to display in the table
+
+    # Select columns to display in the table (matches AI now)
     display_columns = ['University', 'Course Name', 'Total program cost (num)', 'term']
     table_data = filtered_df[display_columns].copy()
+
     # Format currency columns for display
     table_data['Total program cost (num)'] = table_data['Total program cost (num)'].apply(lambda x: f"{x:,.0f} Baht")
     # Handle potential NaN in 'term'
     table_data['term'] = table_data['term'].apply(lambda x: f"{x:,.0f} Baht/term" if pd.notnull(x) else "N/A")
+
     return dash_table.DataTable(
         data=table_data.to_dict('records'),
         columns=[{"name": col, "id": col} for col in display_columns],
         style_table={'overflowX': 'auto'},
-        style_cell={'textAlign': 'left', 'padding': '5px'},
+        # --- START OF MODIFICATIONS FOR WRAPPING (COE) ---
+        style_cell={
+            'textAlign': 'left',
+            'padding': '8px', # Slightly increased padding for readability
+            'whiteSpace': 'normal', # Allow text to wrap
+            'height': 'auto',      # Adjust height automatically
+            'lineHeight': '1.4'    # Improve line spacing
+        },
         style_header={
             'backgroundColor': 'rgb(230, 230, 230)',
-            'fontWeight': 'bold'
+            'fontWeight': 'bold',
+            'whiteSpace': 'normal', # Allow header text to wrap if needed
+            'height': 'auto'
         },
+        # --- END OF MODIFICATIONS FOR WRAPPING (COE) ---
         page_size=10
     )
+# --- END OF FIX ---
+
 
 # --- 9. Run the app ---
 if __name__ == '__main__':

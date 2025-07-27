@@ -1,2 +1,4 @@
 chromedriver-win64/
 venv/
+__pycache__
+data/

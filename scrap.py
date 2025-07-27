@@ -1,3 +1,4 @@
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -10,10 +11,42 @@ import time
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import csv
+import os
+
+# Import the function from another file
+from cost_scraper import scrape_costs_from_dataframe
+
+# Get user input for search option
+print("เลือกตัวเลือกการค้นหา:")
+print("1: วิศวกรรมปัญญาประดิษฐ์")
+print("2: วิศวกรรมคอมพิวเตอร์")
+choice = input("กรุณาใส่ตัวเลข (1 หรือ 2): ").strip()
+
+# Set keywords and folder names based on user choice
+if choice == "1":
+    prevent = 'ปัญญาประดิษฐ์'
+    keyword = "วิศวกรรมปัญญาประดิษฐ์"
+    folder_name = "aie"
+    file_prefix = "aie"
+elif choice == "2":
+    prevent = 'คอมพิวเตอร์'
+    keyword = "วิศวกรรมคอมพิวเตอร์"
+    folder_name = "coe"
+    file_prefix = "coe"
+else:
+    print("ตัวเลือกไม่ถูกต้อง ใช้ค่าเริ่มต้น: วิศวกรรมปัญญาประดิษฐ์")
+    prevent = 'ปัญญาประดิษฐ์'
+    keyword = "วิศวกรรมปัญญาประดิษฐ์"
+    folder_name = "aie"
+    file_prefix = "aie"
+
+# Create directory if it doesn't exist
+directory_path = f"data/{folder_name}"
+os.makedirs(directory_path, exist_ok=True)
 
 # ตั้งค่า browser
 options = Options()
-# options.add_argument("--headless")  # ปิด browser ขณะรันถ้าไม่ต้องการเห็น
+options.add_argument("--headless")  
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
@@ -29,7 +62,6 @@ try:
         EC.presence_of_element_located((By.ID, "search"))
     )
 
-    keyword = "วิศวกรรมปัญญาประดิษฐ์"
     print(f"กำลังพิมพ์คำค้น: '{keyword}'")
     search_input.clear()
     search_input.send_keys(keyword)
@@ -49,9 +81,6 @@ try:
 
     result = []
     skipped_items = []  # เก็บรายการที่ถูกข้าม
-    
-    # เปลี่ยน keyword ที่ใช้ตรวจสอบ
-    prevent = 'ปัญญาประดิษฐ์'
 
     for index, li in enumerate(li_elements):
         try:
@@ -92,9 +121,9 @@ try:
                 pass
 
             item_data = {
-                "มหาวิทยาลัย": university_name,
-                "หลักสูตร": course_title,
-                "ลิงก์": href
+                "University": university_name,
+                "Program": course_title,
+                "Link": href
             }
             result.append(item_data)
             print(f"✅ บันทึกรายการที่ {index + 1}: {course_title}")
@@ -113,7 +142,7 @@ try:
     print("✅ ผลลัพธ์ที่ผ่านการกรอง:")
     print("="*50)
     for i, item in enumerate(result, 1):
-        print(f"{i}. {item['มหาวิทยาลัย']} - {item['หลักสูตร']}")
+        print(f"{i}. {item['University']} - {item['Program']}")
 
     # แสดงรายการที่ถูกข้าม
     print("\n" + "="*50)
@@ -122,40 +151,39 @@ try:
     for item in skipped_items:
         print(f"ลำดับ {item['ลำดับ']}: {item.get('h3_text', 'N/A')} - {item['เหตุผล']}")
 
-    # บันทึกเป็น XML
-    print("\nกำลังบันทึกผลลัพธ์เป็นไฟล์ XML...")
-    root = ET.Element("ผลลัพธ์การค้นหา")
-    root.set("คำค้น", keyword)
-    root.set("จำนวน", str(len(result)))
+    # สร้าง DataFrame จากผลลัพธ์
+    df = pd.DataFrame(result)
+    
+    # ตรวจสอบว่า DataFrame ไม่ว่าง
+    if not df.empty:
+        print("\nกำลังดึงข้อมูลค่าใช้จ่าย...")
+        # ใช้ฟังก์ชัน scrape_costs_from_dataframe จากไฟล์อื่นเพื่อดึงข้อมูลค่าใช้จ่าย
+        df_with_costs = scrape_costs_from_dataframe(df)
+        print("✅ ดึงข้อมูลค่าใช้จ่ายเสร็จสิ้น")
+    else:
+        print("ไม่พบข้อมูลที่จะดึงค่าใช้จ่าย")
+        df_with_costs = df
 
-    for item in result:
-        program = ET.SubElement(root, "หลักสูตร")
-        ET.SubElement(program, "มหาวิทยาลัย").text = item["มหาวิทยาลัย"]
-        ET.SubElement(program, "ชื่อหลักสูตร").text = item["หลักสูตร"]
-        ET.SubElement(program, "ลิงก์").text = item["ลิงก์"]
-
-    # จัดรูปแบบ XML ให้อ่านง่าย
-    rough_string = ET.tostring(root, encoding="utf-8")
-    reparsed = minidom.parseString(rough_string)
-    pretty_xml = reparsed.toprettyxml(indent="  ", encoding="utf-8")
-
-    # บันทึกไฟล์
-    with open("data/raw_aie.csv", "w", encoding="utf-8-sig", newline="") as f:
+    # บันทึกเป็น CSV ด้วย column names ภาษาอังกฤษ
+    print("\nกำลังบันทึกผลลัพธ์เป็นไฟล์ CSV...")
+    filename = f"data/{folder_name}/raw_{file_prefix}.csv"
+    with open(filename, "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f)
         
-        # เขียนหัวตาราง
-        writer.writerow(["ลำดับ", "มหาวิทยาลัย", "หลักสูตร", "ลิงก์"])
+        # เขียนหัวตารางด้วยภาษาอังกฤษ
+        writer.writerow(["No", "University", "Program", "Link", "Cost"])
         
         # เขียนข้อมูลแต่ละแถว
-        for i, item in enumerate(result, 1):
+        for i, (_, row) in enumerate(df_with_costs.iterrows(), 1):
             writer.writerow([
                 i,
-                item["มหาวิทยาลัย"],
-                item["หลักสูตร"],
-                item["ลิงก์"]
+                row["University"],
+                row["Program"],
+                row["Link"],
+                row.get("ค่าใช้จ่าย", "")  # ใช้ get() เพื่อป้องกัน KeyError
             ])
     
-    print("✅ บันทึกไฟล์ 'raw_aie.csv' เสร็จสิ้น")
+    print(f"✅ บันทึกไฟล์ '{filename}' เสร็จสิ้น")
 
 except Exception as e:
     print("เกิดข้อผิดพลาดหลัก:", str(e))

@@ -7,15 +7,15 @@ A web-based interactive dashboard that helps prospective university students exp
 
 ## 📌 Features
 
-- 📊 **Dashboard for AI Engineering and COE Programs**
+- **Dashboard for AI Engineering and COE Programs**
   - Explore tuition costs, number of programs per university, and term information.
-- 🧭 **Interactive Filters**
+- **Interactive Filters**
   - Filter by university, cost range, and sorting preferences.
-- 📈 **Visual Insights**
+- **Visual Insights**
   - Compare program costs with bar charts and university-wise program counts.
-- 📋 **Clean Data Tables**
+- **Clean Data Tables**
   - View detailed program info with formatted columns and text wrapping.
-- 💡 **Designed With Students in Mind**
+- **Designed With Students in Mind**
   - Ideal for high school seniors preparing for TCAS admission decisions.
 
 ---
@@ -111,20 +111,5 @@ scraping_test/
 - Charts and tables auto-update based on user-selected filters.
 - The scraping logic (in `cost_scraper.py`) can be extended to update the datasets regularly.
 
----
 
-## 💡 Why This Project?
 
-This dashboard was created to simplify the decision-making process for students choosing between AI Engineering and Computer Engineering programs. It provides cost comparisons, summary insights, and visual analytics—especially useful for Thai students preparing for **TCAS** applications.
-
----
-
-## 📸 Screenshots
-
-*_(Add screenshots here if available, e.g., of the home page, filter usage, etc.)_
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.

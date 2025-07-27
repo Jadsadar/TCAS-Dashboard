@@ -1,0 +1,80 @@
+.text {
+    font-weight: bold;
+    margin-top: 5px;
+    margin-left: 50px;
+    color: rgb(255, 255, 255);
+    font-size: xx-large;
+}
+.space-top {
+    margin-top: 50px;
+    margin-left: 0px;
+}
+.space-graph {
+    margin-top: 25px;
+    margin-left: 50px;
+}
+.dash {
+    margin-top: 20px;
+    margin-left: 15px;
+}
+.board-curved {
+    border-radius: 15px; /* Adjust the border radius as needed */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Define the shadow effect */
+}
+.nav{
+    margin-top: 10px;
+    margin-left: 260px;
+}
+.tab-style {
+    border-radius: 15px;  
+    box-shadow : 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+.active-text {
+    font-weight: bold;
+    color: black;
+    text-transform: uppercase;
+}
+.table {
+    margin-right: 0px;
+    font-weight: bold;
+}
+.board-search {
+    border-radius: 15px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+.text-start {
+    margin-left: 16px;
+}
+.end {
+    margin-left: 50px;
+}
+.label-tap{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.tap {
+    margin-right: 0px;
+}
+.button {
+    border-radius: 15px; /* Adjust the border radius as needed */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Define the shadow effect */
+    margin-top: 20px;
+}
+.pmlastweek {
+    margin-left: 20%;
+}
+.predic {
+    margin-top: 35px;
+    margin-left: 150px;
+    font-weight: bold;
+}
+.realtime {
+    margin-top: 35px;
+    margin-left: 290px;
+    font-weight: bold;
+    font-style: inherit;
+}
+.space-top-7days {
+    margin-top: 50px;
+    margin-left: 15%;
+}
